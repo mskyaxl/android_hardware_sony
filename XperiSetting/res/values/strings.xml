@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">EGG EXTRA</string>
+    <string name="charger_header">Charger Disable/Enable</string>
+    <string name="about_header">About</string>
+    <string name="about_title">About Extra</string>
+
+    <string name="switch_charger_title">TEST: Switch charger</string>
+    <string name="charger_description">Please turn oo this feature when you need charging.</string>
+    <string name="disable_charger_toast">Charging disabled</string>
+    <string name="enable_charger_toast">Charger enabled</string>
+    <string name="boot_charger_toast">Charger is still disabled since last boot!</string>
+
+    <string name="about">About</string>
+    <string name="about_dialog">Made By EggOxygen\n\nI am NOT responsible for bricked devices!\n\nEGG | BBN | OCD</string>
+
+    <string name="charger_title" translatable="false">H.S.</string>
+
+</resources>

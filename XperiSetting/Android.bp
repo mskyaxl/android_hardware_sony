@@ -1,0 +1,22 @@
+android_app {
+    name: "EggExtra",
+    privileged: true,
+    system_ext_specific: true,
+    platform_apis: true,
+    certificate: "platform",
+
+    srcs: [
+        "src/**/*.kt",
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "androidx.appcompat_appcompat",
+        "androidx-constraintlayout_constraintlayout",
+        "androidx.core_core",
+        "kotlin-stdlib",
+        "androidx.preference_preference",
+        "vendor.semc.hardware.charger-V1.0-java"
+    ],
+}
+
