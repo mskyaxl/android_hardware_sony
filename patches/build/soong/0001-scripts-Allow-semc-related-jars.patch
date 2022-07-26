@@ -1,0 +1,25 @@
+From e925c296a4e394943166ea6b0af2b2cbc0bf3b99 Mon Sep 17 00:00:00 2001
+From: Luofan Chen <clfbbn@gmail.com>
+Date: Wed, 27 Jul 2022 01:36:32 +0800
+Subject: [PATCH] scripts: Allow semc related jars
+
+Signed-off-by: Luofan Chen <clfbbn@gmail.com>
+Change-Id: Ic3ec5ff548281dbc6444cd9464f33e95172a473c
+---
+ scripts/check_boot_jars/package_allowed_list.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/scripts/check_boot_jars/package_allowed_list.txt b/scripts/check_boot_jars/package_allowed_list.txt
+index 22703c7ee..4b2b79cac 100644
+--- a/scripts/check_boot_jars/package_allowed_list.txt
++++ b/scripts/check_boot_jars/package_allowed_list.txt
+@@ -263,3 +263,6 @@ qcom.fmradio
+ ###################################################
+ # IFAA Manager used for Alipay and/or WeChat payment
+ org\.ifaa\.android\.manager.*
++
++# SEMC
++vendor.semc.*
+-- 
+2.37.1
+

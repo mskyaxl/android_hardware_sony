@@ -1,0 +1,116 @@
+From 126bfb94f6152f80d8d0a587a53cf8a7c4d51bdd Mon Sep 17 00:00:00 2001
+From: Luofan Chen <clfbbn@gmail.com>
+Date: Wed, 27 Jul 2022 01:33:34 +0800
+Subject: [PATCH] services: display: Adjust for sony display service
+
+Signed-off-by: Luofan Chen <clfbbn@gmail.com>
+Change-Id: Icb077cbbd4fbd265e95bf3365465de7078517232
+---
+ Android.bp                                    |  2 +
+ .../server/display/DisplayManagerService.java |  6 +++
+ .../server/display/SomcDisplayMonitor.java    | 49 +++++++++++++++++++
+ 3 files changed, 57 insertions(+)
+ create mode 100644 services/core/java/com/android/server/display/SomcDisplayMonitor.java
+
+diff --git a/Android.bp b/Android.bp
+index 0190e7d6c349..a97bb6861ede 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -266,6 +266,8 @@ java_library {
+         "android.hardware.vibrator-V1.2-java",
+         "android.hardware.vibrator-V1.3-java",
+         "android.hardware.vibrator-V2-java",
++	"vendor.semc.hardware.display-V2.0-java",
++
+         "android.system.suspend.control.internal-java",
+         "devicepolicyprotosnano",
+ 
+diff --git a/services/core/java/com/android/server/display/DisplayManagerService.java b/services/core/java/com/android/server/display/DisplayManagerService.java
+index b394d6b49d65..c4816250e155 100644
+--- a/services/core/java/com/android/server/display/DisplayManagerService.java
++++ b/services/core/java/com/android/server/display/DisplayManagerService.java
+@@ -204,6 +204,7 @@ public final class DisplayManagerService extends SystemService {
+     private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATIONS = 6;
+     private static final int MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE = 7;
+     private static final int MSG_DELIVER_DISPLAY_GROUP_EVENT = 8;
++    private static final int MSG_SOMC_DISPLAY_EVENT = 9;
+ 
+     private final Context mContext;
+     private final DisplayManagerHandler mHandler;
+@@ -590,6 +591,7 @@ public final class DisplayManagerService extends SystemService {
+         mDisplayModeDirector.start(mSensorManager);
+ 
+         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
++        mHandler.sendEmptyMessage(MSG_SOMC_DISPLAY_EVENT);
+ 
+         mSettingsObserver = new SettingsObserver();
+ 
+@@ -2247,6 +2249,10 @@ public final class DisplayManagerService extends SystemService {
+                 case MSG_DELIVER_DISPLAY_GROUP_EVENT:
+                     deliverDisplayGroupEvent(msg.arg1, msg.arg2);
+                     break;
++                case MSG_SOMC_DISPLAY_EVENT:
++                    SomcDisplayMonitor displayMonitor = new SomcDisplayMonitor();
++                    displayMonitor.setup();
++                    break;
+ 
+             }
+         }
+diff --git a/services/core/java/com/android/server/display/SomcDisplayMonitor.java b/services/core/java/com/android/server/display/SomcDisplayMonitor.java
+new file mode 100644
+index 000000000000..8f6d1c6fea3b
+--- /dev/null
++++ b/services/core/java/com/android/server/display/SomcDisplayMonitor.java
+@@ -0,0 +1,49 @@
++package com.android.server.display;
++
++import android.os.RemoteException;
++import android.util.Log;
++import com.android.server.LocalServices;
++import com.android.server.display.color.DisplayTransformManager;
++import vendor.semc.hardware.display.V2_0.IDisplay;
++import vendor.semc.hardware.display.V2_0.IDisplayCallback;
++import vendor.semc.hardware.display.V2_0.PccMatrix;
++
++public class SomcDisplayMonitor extends IDisplayCallback.Stub {
++    private static final String TAG = SomcDisplayMonitor.class.getSimpleName();
++    private IDisplay mDisplay;
++    private PccMatrix mMatrix;
++
++    public boolean setup() {
++        Log.e(TAG, "<<< BBN: Setup");
++        if (this.mDisplay == null) {
++            try {
++                IDisplay service = IDisplay.getService();
++                this.mDisplay = service;
++                if (service == null) {
++                    Log.e(TAG, "Failed to get IDisplay");
++                    return false;
++                }
++                service.registerCallback(this);
++                this.mDisplay.setup();
++                return true;
++            } catch (RemoteException e) {
++                String str = TAG;
++                Log.e(str, "Failed to get IDisplay due to remote exception[" + e + "]");
++                this.mDisplay = null;
++                return false;
++            } catch (RuntimeException e2) {
++                Log.e(TAG, "setup: RuntimeException");
++                this.mDisplay = null;
++                return false;
++            }
++        }
++        return true;
++    }
++
++    @Override // vendor.semc.hardware.display.V2_0.IDisplayCallback
++    public void onWhiteBalanceMatrixChanged(PccMatrix matrix) {
++        float[] white_balance_matrix = {matrix.red, 0.0f, 0.0f, 0.0f, 0.0f, matrix.green, 0.0f, 0.0f, 0.0f, 0.0f, matrix.blue, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
++        DisplayTransformManager dtm = (DisplayTransformManager) LocalServices.getService(DisplayTransformManager.class);
++        dtm.setColorMatrix(400, white_balance_matrix);
++    }
++}
+-- 
+2.37.1
+
