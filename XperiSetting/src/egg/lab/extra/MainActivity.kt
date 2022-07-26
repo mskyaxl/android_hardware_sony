@@ -8,7 +8,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import egg.lab.extra.utils.ChargingCtrl
-
+import egg.lab.extra.utils.CMUtils
 
 
 private const val TAG : String = "EggExtra";
@@ -29,10 +29,12 @@ class MainActivity : AppCompatActivity() {
     class SettingsFragment : PreferenceFragmentCompat() {
 
         private var mChargingCtrl : ChargingCtrl? = null
+        private var mCMCtrl : CMUtils? = null
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
 
             this.mChargingCtrl = ChargingCtrl()
+            this.mCMCtrl = CMUtils(context)
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
             // Check state from Settings
@@ -47,6 +49,18 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     mChargingCtrl?.enableCharging(context)
                     Settings.System.putInt(context?.contentResolver, "egg_extra_charging_disable", 0)
+                }
+                true
+            }
+
+            findPreference<SwitchPreference>("switchCreatorMode")!!.setOnPreferenceChangeListener { _, state ->
+                if (state as Boolean) {
+                    // TODO
+                    mCMCtrl?.enableCM()
+                    Settings.System.putInt(context?.contentResolver, "egg_extra_cm", 1)
+                } else {
+                    mCMCtrl?.disableCM()
+                    Settings.System.putInt(context?.contentResolver, "egg_extra_cm", 0)
                 }
                 true
             }

@@ -14,6 +14,17 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:summary="@string/display_description"
+        app:title="@string/display_header">
+
+        <SwitchPreference app:key="switchCreatorMode"
+                          app:iconSpaceReserved="false"
+                          app:title="@string/switch_display_title"
+        />
+    </PreferenceCategory>
+
+    <PreferenceCategory
             app:iconSpaceReserved="false"
             app:title="@string/about_header">
 

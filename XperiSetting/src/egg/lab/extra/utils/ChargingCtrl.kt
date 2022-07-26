@@ -1,9 +1,6 @@
 package egg.lab.extra.utils
 
 import android.content.Context
-import android.content.Intent
-import android.widget.Toast
-import egg.lab.extra.R
 import vendor.semc.hardware.charger.V1_0.ICharger;
 import android.util.Log
 import android.os.RemoteException

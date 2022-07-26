@@ -16,7 +16,10 @@ android_app {
         "androidx.core_core",
         "kotlin-stdlib",
         "androidx.preference_preference",
-        "vendor.semc.hardware.charger-V1.0-java"
+        "vendor.semc.hardware.charger-V1.0-java",
+        "vendor.semc.hardware.display-V2.0-java",
+        "vendor.semc.hardware.display-V2.1-java",
+        "vendor.semc.hardware.display-V2.2-java"
     ],
 }
 
