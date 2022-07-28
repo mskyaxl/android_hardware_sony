@@ -1,0 +1,57 @@
+From a89f5da76af0ec75efa8870d8f03dfcb44831193 Mon Sep 17 00:00:00 2001
+From: Luofan Chen <clfbbn@gmail.com>
+Date: Thu, 28 Jul 2022 21:23:22 +0800
+Subject: [PATCH] sm8250-common: Fixed color setting
+
+Disable color management in settings app because it does not work
+
+Signed-off-by: Luofan Chen <clfbbn@gmail.com>
+---
+ .../frameworks/base/core/res/res/values/config.xml    | 11 -----------
+ overlay/packages/apps/Settings/res/values/config.xml  | 11 +++++++++++
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+ create mode 100644 overlay/packages/apps/Settings/res/values/config.xml
+
+diff --git a/overlay/frameworks/base/core/res/res/values/config.xml b/overlay/frameworks/base/core/res/res/values/config.xml
+index b267dba..bb519d1 100644
+--- a/overlay/frameworks/base/core/res/res/values/config.xml
++++ b/overlay/frameworks/base/core/res/res/values/config.xml
+@@ -471,18 +471,7 @@
+ 
+     <integer-array name="config_availableColorModes">
+         <item>0</item>
+-        <item>1</item>
+         <item>3</item>
+-        <item>256</item>
+-        <item>257</item>
+-        <item>258</item>
+-        <item>259</item>
+-        <item>260</item>
+-        <item>261</item>
+-        <item>262</item>
+-        <item>263</item>
+-        <item>264</item>
+-        <item>265</item>
+     </integer-array>
+ 
+ </resources>
+diff --git a/overlay/packages/apps/Settings/res/values/config.xml b/overlay/packages/apps/Settings/res/values/config.xml
+new file mode 100644
+index 0000000..701fd78
+--- /dev/null
++++ b/overlay/packages/apps/Settings/res/values/config.xml
+@@ -0,0 +1,11 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++     Copyright (C) 2022 The LineageOS Project
++     SPDX-License-Identifier: Apache-2.0
++-->
++<resources>
++
++    <!-- Whether this device supports color mode management -->
++    <bool name="config_colorModeAvailable">false</bool>
++
++</resources>
+-- 
+2.37.1
+
