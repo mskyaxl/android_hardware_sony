@@ -1,0 +1,48 @@
+From 1a56b179c0f4e791405a488242bc0831c00501af Mon Sep 17 00:00:00 2001
+From: Marijn Suijten <marijns95@gmail.com>
+Date: Fri, 18 Sep 2020 14:57:02 +0200
+Subject: [PATCH 07/26] extn: cirrus_sony: Apply device audio path when
+ starting
+
+enable_snd_device in audio_hw.c does not apply (nor reset in
+disable_snd_device) the audio path belonging to spkr_prot devices.  This
+is the responsibility of the external spkr_prot implementation, as can
+be seen in cirrus_playback which properly applies and resets the path in
+start_ and stop_processing respectively.
+
+Doing this setup means the "speaker" path is finally selected on
+Seine/PDX201 again, allowing us to enable dual-mono without the hardware
+getting confused.
+
+Signed-off-by: Marijn Suijten <marijns95@gmail.com>
+---
+ hal/audio_extn/cirrus_sony.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index c21187a01..87c8d352e 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -1434,6 +1434,9 @@ int spkr_prot_start_processing(__unused snd_device_t snd_device) {
+ 
+     pthread_mutex_lock(&handle.fb_prot_mutex);
+ 
++    audio_route_apply_and_update_path(adev->audio_route,
++                                      fp_platform_get_snd_device_name(snd_device));
++
+     if (handle.state == IDLE)
+         (void)pthread_create(&handle.failure_detect_thread,
+                     (const pthread_attr_t *) NULL,
+@@ -1453,6 +1456,9 @@ void spkr_prot_stop_processing(__unused snd_device_t snd_device) {
+ 
+     ALOGV("%s: Entry", __func__);
+ 
++    audio_route_reset_path(adev->audio_route,
++                           fp_platform_get_snd_device_name(snd_device));
++
+     pthread_mutex_lock(&handle.fb_prot_mutex);
+ 
+     handle.state = IDLE;
+-- 
+2.37.1
+

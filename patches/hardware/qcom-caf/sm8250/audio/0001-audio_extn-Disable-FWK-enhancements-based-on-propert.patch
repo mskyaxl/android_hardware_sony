@@ -1,0 +1,49 @@
+From 56b0ab74e85e9e5fd0bebcc90d1a16126216b409 Mon Sep 17 00:00:00 2001
+From: AngeloGioacchino Del Regno <kholk11@gmail.com>
+Date: Mon, 22 Jun 2020 11:48:27 +0200
+Subject: [PATCH 01/26] audio_extn: Disable FWK enhancements based on property
+
+Some devices may have FWK enhancements for some components, like
+the IMS or video, but not for audio: in this case, sound will be
+completely KO.
+
+At this point, just add a property that default-disables the FWK
+enhancements in the audio HAL, unless it's set true.
+
+To enable FWK detection here, set "vendor.audio.full.fwk.enhance"
+to true.
+---
+ hal/audio_extn/utils.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/hal/audio_extn/utils.c b/hal/audio_extn/utils.c
+index 0ba2f4f82..5b261ddc9 100644
+--- a/hal/audio_extn/utils.c
++++ b/hal/audio_extn/utils.c
+@@ -3156,6 +3156,11 @@ bool audio_extn_utils_is_vendor_enhanced_fwk()
+     if (is_vendor_enhanced_fwk != -EINVAL)
+         return (bool)is_vendor_enhanced_fwk;
+ 
++    if (!property_get_bool("vendor.audio.full.fwk.enhance", false)) {
++        is_vendor_enhanced_fwk = 0;
++        return is_vendor_enhanced_fwk;
++    }
++
+     vndk_fwk_init();
+ 
+     if (mVndkFwk.isVendorEnhancedFwk != NULL) {
+@@ -3175,6 +3180,11 @@ int audio_extn_utils_get_vendor_enhanced_info()
+     if (vendor_enhanced_info != -EINVAL)
+         return vendor_enhanced_info;
+ 
++    if (!property_get_bool("vendor.audio.full.fwk.enhance", false)) {
++        vendor_enhanced_info = 0;
++        return vendor_enhanced_info;
++    }
++
+     vndk_fwk_init();
+ 
+     if (mVndkFwk.getVendorEnhancedInfo != NULL) {
+-- 
+2.37.1
+

@@ -1,0 +1,61 @@
+From e3d19cd9d77cd210faa524ada4246c70a336b15d Mon Sep 17 00:00:00 2001
+From: Marijn Suijten <marijns95@gmail.com>
+Date: Sat, 31 Oct 2020 12:01:04 +0100
+Subject: [PATCH 09/26] cirrus_sony: Use cirrus_set_mixer_value_by_name_lr
+ helper
+
+This nice helper is around to simplify repetitive bits of code; put it
+to good use.
+
+Signed-off-by: Marijn Suijten <marijns95@gmail.com>
+---
+ hal/audio_extn/cirrus_sony.c | 23 ++++-------------------
+ 1 file changed, 4 insertions(+), 19 deletions(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index 1d727aee4..8ee043c0f 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -671,20 +671,11 @@ exit:
+ }
+ 
+ static inline int cirrus_set_force_wake(bool enable) {
+-    char *ctl_name;
+-    int ctl_sz = CIRRUS_CTL_NAME_BUF;
+     int ret = 0;
+ 
+     if (handle.is_stereo) {
+-        ctl_name = (char *)calloc(ctl_sz, sizeof(char));
+-        ret = cirrus_format_mixer_name(CIRRUS_CTL_FORCE_WAKE, "L",
+-                                        &ctl_name, ctl_sz);
+-        ret += cirrus_set_mixer_value_by_name(ctl_name, (int)enable);
+-
+-        ret += cirrus_format_mixer_name(CIRRUS_CTL_FORCE_WAKE, "R",
+-                                        &ctl_name, ctl_sz);
+-        ret += cirrus_set_mixer_value_by_name(ctl_name, (int)enable);
+-        free(ctl_name);
++        ret = cirrus_set_mixer_value_by_name_lr(CIRRUS_CTL_FORCE_WAKE,
++                                                (int)enable);
+     } else {
+         ret = cirrus_set_mixer_value_by_name(CIRRUS_CTL_FORCE_WAKE,
+                                              (int)enable);
+@@ -976,14 +967,8 @@ static int cirrus_stereo_calibration(void) {
+         goto exit;
+ 
+     /* Same CAL_AMBIENT for both speakers */
+-    ret = cirrus_format_mixer_name(CIRRUS_CTL_CALI_CAL_AMBIENT, "L",
+-                                   &ctl_name, ctl_sz);
+-    ret += cirrus_set_mixer_array_by_name(CIRRUS_CTL_CALI_CAL_AMBIENT,
+-                                          cal_ambient, 4);
+-    ret += cirrus_format_mixer_name(CIRRUS_CTL_CALI_CAL_AMBIENT, "R",
+-                                   &ctl_name, ctl_sz);
+-    ret += cirrus_set_mixer_array_by_name(CIRRUS_CTL_CALI_CAL_AMBIENT,
+-                                          cal_ambient, 4);
++    ret = cirrus_set_mixer_value_by_name_lr(CIRRUS_CTL_CALI_CAL_AMBIENT,
++                                            4);
+     if (ret < 0) {
+         ALOGE("%s: Cannot set ambient calibration", __func__);
+         goto exit;
+-- 
+2.37.1
+

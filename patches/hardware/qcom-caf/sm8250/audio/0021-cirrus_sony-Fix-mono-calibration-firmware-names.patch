@@ -1,0 +1,34 @@
+From 8f71ac1c3134512df3b1ad0f34b345f8db1f2ba4 Mon Sep 17 00:00:00 2001
+From: Frajo Haider <f_haider@gmx.at>
+Date: Wed, 17 Mar 2021 12:10:05 +0200
+Subject: [PATCH 21/26] cirrus_sony: Fix mono calibration firmware names
+
+---
+ hal/audio_extn/cirrus_sony.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index 06ed8d877..a6954e675 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -1196,15 +1196,13 @@ static int cirrus_do_fw_mono_download(int do_reset) {
+         goto exit;
+     }
+ 
+-    ret = cirrus_set_mixer_array_by_name(CIRRUS_CTL_CALI_CAL_STATUS,
+-                                         &handle.spkr.status, 4);
++    ret = cirrus_write_cal_status(&handle.spkr, 0);
+     if (ret < 0) {
+         ALOGE("%s: Cannot set calibration status", __func__);
+         goto exit;
+     }
+ 
+-    ret = cirrus_set_mixer_array_by_name(CIRRUS_CTL_CALI_CAL_CHECKSUM,
+-                                         &handle.spkr.checksum, 4);
++    ret = cirrus_write_cal_checksum(&handle.spkr, 0);
+     if (ret < 0) {
+         ALOGE("%s: Cannot set calibration checksum", __func__);
+         goto exit;
+-- 
+2.37.1
+

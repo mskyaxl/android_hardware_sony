@@ -1,0 +1,77 @@
+From eff257ee602fffe206c5956733ff4cbefff7be5d Mon Sep 17 00:00:00 2001
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@somainline.org>
+Date: Sat, 13 Feb 2021 19:10:29 +0100
+Subject: [PATCH 23/26] cirrus_sony: Loop around DSP state after calibration
+
+Instead of waiting for a arbitrary amount of time in any case,
+a better user experience may be (in some cases) achieved by
+looping through the DSP state: if we succeed to change the DSP
+firmware mixer (to load the new FW) before the max wait, that's
+going to be... well... less time to lose.
+
+This actually brings benefits depending on the specific device
+and on the specific boot: for example, my PDX203 sometimes
+takes as much as 5 seconds, sometimes just two, and this probably
+depends on the boot order since it's entirely async, which gets
+different depending on the device state before actually booting,
+as the hardware will be in different states and some daemons
+init time will be skewed;
+
+For example:
+- Bootloader version X will leave some HW in a different state
+  than version Y; or
+- The device is booting from a fastboot continue command; or
+- The device is cold booting.
+---
+ hal/audio_extn/cirrus_sony.c | 26 +++++++++++++++++++++++---
+ 1 file changed, 23 insertions(+), 3 deletions(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index e636cc2bd..3c1712f42 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -1259,18 +1259,38 @@ exit:
+ static int cirrus_do_fw_stereo_download(int do_reset) {
+     char ctl_name[CIRRUS_CTL_NAME_BUF];
+     bool cal_valid = false, status_ok = false, checksum_ok = false;
+-    int ret = 0;
++    int i, max_retries = 24, ret = 0;
+ 
+     ALOGI("%s: Sending speaker protection stereo firmware", __func__);
+ 
+-    ret = cirrus_exec_fw_download("Protection", "R", do_reset);
++    for (i = 0; i < max_retries; i++) {
++        ret = cirrus_exec_fw_download("Protection", "R", do_reset);
++        if (ret == 0)
++            break;
++        usleep(500000);
++    }
+     if (ret != 0) {
+         ALOGE("%s: Cannot send Protection R firmware: bailing out.",
+               __func__);
+         return -EINVAL;
+     }
+ 
+-    ret = cirrus_exec_fw_download("Protection", "L", do_reset);
++    /*
++     * Guarantee that we retry for at least 3 seconds... but the
++     * other firmware should just load instantly, since we've been
++     * waiting for the DSP at R-SPK loading time.
++     *
++     * This is only to paranoidly account any possible future issue.
++     */
++    if (max_retries < 6)
++        max_retries = 6;
++
++    for (i = 0; i < max_retries; i++) {
++        ret = cirrus_exec_fw_download("Protection", "L", do_reset);
++        if (ret == 0)
++            break;
++        usleep(500000);
++    }
+     if (ret != 0) {
+         ALOGE("%s: Cannot send Protection L firmware: bailing out.",
+               __func__);
+-- 
+2.37.1
+

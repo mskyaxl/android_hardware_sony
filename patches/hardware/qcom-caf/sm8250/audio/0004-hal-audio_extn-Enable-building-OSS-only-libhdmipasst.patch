@@ -1,0 +1,50 @@
+From 8fbf83b7ae3c07e56a13658812fec0d0b5049417 Mon Sep 17 00:00:00 2001
+From: AngeloGioacchino Del Regno <kholk11@gmail.com>
+Date: Tue, 23 Jun 2020 10:52:48 +0200
+Subject: [PATCH 04/26] hal: audio_extn: Enable building OSS only
+ libhdmipassthru
+
+This library passes through the audio to the HDMI "as it is",
+but there is an ifdef "DTSHD_PARSER_ENABLED" that, when enabled,
+adds a dependency on proprietary audio_parsers.h header and
+libaudioparsers, breaking opensource builds.
+
+Disable the DTS HD passthrough by default for this library and
+make it possible to enable it (with its proprietary requirements)
+through the env variable TARGET_COMPILE_WITH_PROPRIETARY_PARSERS.
+---
+ hal/audio_extn/Android.mk | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/hal/audio_extn/Android.mk b/hal/audio_extn/Android.mk
+index 7bb7c1730..98051ae63 100644
+--- a/hal/audio_extn/Android.mk
++++ b/hal/audio_extn/Android.mk
+@@ -607,11 +607,9 @@ LOCAL_CFLAGS += \
+     -Wall \
+     -Werror \
+     -Wno-unused-function \
+-    -Wno-unused-variable \
+-    -DDTSHD_PARSER_ENABLED
++    -Wno-unused-variable
+ 
+ LOCAL_SHARED_LIBRARIES := \
+-    libaudioparsers \
+     libaudioroute \
+     libaudioutils \
+     libcutils \
+@@ -621,6 +619,11 @@ LOCAL_SHARED_LIBRARIES := \
+     libtinyalsa \
+     libtinycompress
+ 
++ifeq ($(TARGET_COMPILE_WITH_PROPRIETARY_PARSERS),true)
++LOCAL_CFLAGS += -DDTSHD_PARSER_ENABLED
++LOCAL_SHARED_LIBRARIES += libaudioparsers
++endif
++
+ LOCAL_C_INCLUDES := \
+     $(PRIMARY_HAL_PATH) \
+     $(PRIMARY_HAL_PATH)/$(AUDIO_PLATFORM) \
+-- 
+2.37.1
+

@@ -1,0 +1,53 @@
+From 81e37401382b6bb7057de8547a50ac281a31ddf8 Mon Sep 17 00:00:00 2001
+From: Frajo Haider <f_haider@gmx.at>
+Date: Wed, 10 Mar 2021 19:18:21 +0000
+Subject: [PATCH 26/26] cirrus_sony: don't sleep(6) since we have a retry loop
+ already.
+
+Instead extend the retry loop to include the 6 seconds in which
+previously nothing was done.
+---
+ hal/audio_extn/cirrus_sony.c | 13 ++-----------
+ 1 file changed, 2 insertions(+), 11 deletions(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index 37a97fab3..d294f83eb 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -1210,7 +1210,7 @@ exit:
+ 
+ static int cirrus_do_fw_mono_download(int do_reset) {
+     bool cal_valid = false, status_ok = false, checksum_ok = false;
+-    int i, max_retries = 24, ret = 0;
++    int i, max_retries = 32, ret = 0;
+ 
+     for (i = 0; i < max_retries; i++) {
+         ret = cirrus_exec_fw_download("Protection", 0, do_reset);
+@@ -1264,7 +1264,7 @@ exit:
+ static int cirrus_do_fw_stereo_download(int do_reset) {
+     char ctl_name[CIRRUS_CTL_NAME_BUF];
+     bool cal_valid = false, status_ok = false, checksum_ok = false;
+-    int i, max_retries = 24, ret = 0;
++    int i, max_retries = 32, ret = 0;
+ 
+     ALOGI("%s: Sending speaker protection stereo firmware", __func__);
+ 
+@@ -1427,15 +1427,6 @@ static void *cirrus_do_calibration() {
+         ret = 0;
+     }
+ 
+-    /*
+-     * There is no way to know when the DSP will be really ready. Usually,
+-     * it takes around 4 seconds, but let's wait a bit more... In any case
+-     * the calibration process happens only *once* in an entire userdata
+-     * life, which means that only the first boot ever will be slow, in
+-     * favor of a good speaker calibration.
+-     */
+-    sleep(6);
+-
+ skip_calibration:
+     if (handle.is_stereo)
+         ret = cirrus_do_fw_stereo_download(0);
+-- 
+2.37.1
+

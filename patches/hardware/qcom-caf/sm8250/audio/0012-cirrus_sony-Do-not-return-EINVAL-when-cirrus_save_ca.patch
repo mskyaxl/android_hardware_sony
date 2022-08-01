@@ -1,0 +1,32 @@
+From 7595f1b06e09e5362ed59b2f730b7a884e2a1050 Mon Sep 17 00:00:00 2001
+From: Marijn Suijten <marijns95@gmail.com>
+Date: Sat, 13 Feb 2021 15:36:09 +0100
+Subject: [PATCH 12/26] cirrus_sony: Do not return -EINVAL when
+ cirrus_save_calibration succeeds
+
+Initializing ret to -EINVAL, but never updating it when everything is
+sucessful results in a misleading:
+
+    audio_hw_sony_cirrus_playback: cirrus_do_calibration: Cannot save calibration to file (-22)!!!
+
+Signed-off-by: Marijn Suijten <marijns95@gmail.com>
+---
+ hal/audio_extn/cirrus_sony.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index cc91a85ce..436f7eff9 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -266,7 +266,7 @@ end:
+ static int cirrus_save_calibration(struct cirrus_playback_session *hdl) {
+     FILE* fp_calparams = NULL;
+     struct cirrus_cal_file_t fdata;
+-    int ret = -EINVAL;
++    int ret = 0;
+ 
+     fp_calparams = fopen(CIRRUS_AUDIO_CAL_PATH, "wb");
+     if (fp_calparams == NULL)
+-- 
+2.37.1
+

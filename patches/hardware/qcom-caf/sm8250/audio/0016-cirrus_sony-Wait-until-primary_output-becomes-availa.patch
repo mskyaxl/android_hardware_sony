@@ -1,0 +1,32 @@
+From a7f4b184a9e09acb3861d02e2e7f27405c5f11c0 Mon Sep 17 00:00:00 2001
+From: Marijn Suijten <marijns95@gmail.com>
+Date: Wed, 10 Feb 2021 19:59:36 +0100
+Subject: [PATCH 16/26] cirrus_sony: Wait until `primary_output` becomes
+ available
+
+This pointer strangely has a value immediately on Edo, but not on Seine.
+---
+ hal/audio_extn/cirrus_sony.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index 914b4aaaa..852c74f38 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -610,6 +610,13 @@ static int cirrus_play_silence(int seconds) {
+     if (!uc_info_rx) {
+         return -ENOMEM;
+     }
++
++    while (!adev->primary_output) {
++        ALOGE("Still no primary_output!");
++        // TODO: Perhaps wait on a condvar like spkr_prot?
++        usleep(1000);
++    }
++
+     uc_info_rx->id = USECASE_AUDIO_PLAYBACK_DEEP_BUFFER;
+     uc_info_rx->type = PCM_PLAYBACK;
+     uc_info_rx->in_snd_device = SND_DEVICE_NONE;
+-- 
+2.37.1
+

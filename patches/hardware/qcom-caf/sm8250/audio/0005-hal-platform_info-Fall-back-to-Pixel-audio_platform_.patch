@@ -1,0 +1,48 @@
+From a0d4192413324a04a0c5a2e5316b120109a4e8c9 Mon Sep 17 00:00:00 2001
+From: AngeloGioacchino Del Regno <kholk11@gmail.com>
+Date: Mon, 29 Jun 2020 10:14:11 +0200
+Subject: [PATCH 05/26] hal: platform_info: Fall back to Pixel
+ audio_platform_info if error
+
+On some platforms, the audio_platform_info.xml file gets renamed
+in many very creative ways.
+If someone wants to stay clean, that someone is being forced into
+finding what kind of creative names the HAL wants for the specific
+sound card combination on the device, which is tricky and really
+not an immediate nor the best way to do it: after all, if you are
+bringing up audio for a project, you're not pushing configurations
+that don't belong to that specific project, so why the... :)))
+
+For this reason, introduce a fallback mechanism so that if the
+Qualcomm creative suffix to "audio_platform_info" is not valid or
+the developer hasn't played the find-the-name game, try to read
+the standard "audio_platform_info.xml" file, as per Google's
+guidelines.
+
+Co-authored-by: Marijn Suijten <marijns95@gmail.com>
+---
+ hal/platform_info.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/hal/platform_info.c b/hal/platform_info.c
+index 84f56a10b..ffc7e706c 100644
+--- a/hal/platform_info.c
++++ b/hal/platform_info.c
+@@ -1585,6 +1585,14 @@ int platform_info_init(const char *filename, void *platform, caller_t caller_typ
+     file = fopen(platform_info_file_name, "r");
+     section = ROOT;
+ 
++    if (!file) {
++        ALOGD("%s: Failed to open %s, trying to fall back to %s",
++              __func__, platform_info_file_name, platform_info_xml_path);
++        strlcpy(platform_info_file_name, platform_info_xml_path,
++                MIXER_PATH_MAX_LENGTH);
++        file = fopen(platform_info_file_name, "r");
++    }
++
+     if (!file) {
+         ALOGD("%s: Failed to open %s, using defaults.",
+             __func__, platform_info_file_name);
+-- 
+2.37.1
+

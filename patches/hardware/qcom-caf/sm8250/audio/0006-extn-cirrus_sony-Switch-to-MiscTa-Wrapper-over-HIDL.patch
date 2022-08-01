@@ -1,0 +1,35 @@
+From f896cbe5eef52c1dfee555ae3c4fc3a3a06137ec Mon Sep 17 00:00:00 2001
+From: Marijn Suijten <marijns95@gmail.com>
+Date: Wed, 5 Aug 2020 09:51:55 +0200
+Subject: [PATCH 06/26] extn: cirrus_sony: Switch to MiscTa Wrapper over HIDL
+
+We are not the first to hit permission limitations on the TA daemon
+socket, in our case without the ability to add the appropriate group
+(`system`) to the AOSP audioserver library this HAL is loaded into.
+Fortunately our ODM image provides a MiscTa wrapper that uses binder
+under the hood to offload the actual miscta calls (and permission burden
+that comes with it) to a separate service.  This wrapper exposes the
+exact same C interface as libmsicta.so making it a drop-in replacement
+(as intended).
+
+Signed-off-by: Marijn Suijten <marijns95@gmail.com>
+---
+ hal/audio_extn/cirrus_sony.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index b74eaf4af..c21187a01 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -92,7 +92,7 @@ struct cirrus_playback_session {
+ };
+ 
+ /* TA handling */
+-#define LIB_MISCTA	"libmiscta.so"
++#define LIB_MISCTA	"libMiscTaWrapper.so"
+ #define TA_DEBUG 1
+ 
+ /* TA functions */
+-- 
+2.37.1
+

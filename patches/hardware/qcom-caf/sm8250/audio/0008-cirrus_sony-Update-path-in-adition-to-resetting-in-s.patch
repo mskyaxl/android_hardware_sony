@@ -1,0 +1,41 @@
+From 99c0d3d37d8a2df67d541381e289d37cad73337c Mon Sep 17 00:00:00 2001
+From: Marijn Suijten <marijns95@gmail.com>
+Date: Sat, 17 Oct 2020 20:03:40 +0200
+Subject: [PATCH 08/26] cirrus_sony: Update path in adition to resetting in
+ stop_processing
+
+Just resetting the path at hand does not seem to recursively reset
+included `<path>`s.
+
+In the case of our dual mono feature `EAR_RDAC Switch` stays on when
+headphones are plugged in after playing back audio on speakers meaning
+that the sound is still coming from the earpiece.
+
+With this change `EAR_RDAC Switch` is properly reset to `Off` when
+plugging in headphones and audio does not play over the earpiece
+anymore.
+
+Fixes: 9c89b44a1fc747c8008d8be468d3ed214cf4c147
+Signed-off-by: Marijn Suijten <marijns95@gmail.com>
+---
+ hal/audio_extn/cirrus_sony.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hal/audio_extn/cirrus_sony.c b/hal/audio_extn/cirrus_sony.c
+index 87c8d352e..1d727aee4 100644
+--- a/hal/audio_extn/cirrus_sony.c
++++ b/hal/audio_extn/cirrus_sony.c
+@@ -1456,8 +1456,8 @@ void spkr_prot_stop_processing(__unused snd_device_t snd_device) {
+ 
+     ALOGV("%s: Entry", __func__);
+ 
+-    audio_route_reset_path(adev->audio_route,
+-                           fp_platform_get_snd_device_name(snd_device));
++    audio_route_reset_and_update_path(adev->audio_route,
++                                      fp_platform_get_snd_device_name(snd_device));
+ 
+     pthread_mutex_lock(&handle.fb_prot_mutex);
+ 
+-- 
+2.37.1
+

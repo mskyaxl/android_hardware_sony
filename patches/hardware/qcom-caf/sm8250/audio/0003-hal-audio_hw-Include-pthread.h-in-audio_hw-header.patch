@@ -1,0 +1,25 @@
+From 8efff2f8a53bca060259ff9a4db98bd5b7b42faa Mon Sep 17 00:00:00 2001
+From: AngeloGioacchino Del Regno <kholk11@gmail.com>
+Date: Mon, 22 Jun 2020 12:41:04 +0200
+Subject: [PATCH 03/26] hal: audio_hw: Include pthread.h in audio_hw header
+
+This header is used by all of the c files requiring pthreads.
+---
+ hal/audio_hw.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hal/audio_hw.h b/hal/audio_hw.h
+index ff1f29303..afc668dd9 100644
+--- a/hal/audio_hw.h
++++ b/hal/audio_hw.h
+@@ -51,6 +51,7 @@
+ #include <audio_utils/ErrorLog.h>
+ #include <audio_utils/Statistics.h>
+ #include <audio_utils/clock.h>
++#include <pthread.h>
+ #include "audio_defs.h"
+ #include "voice.h"
+ #include "audio_hw_extn_api.h"
+-- 
+2.37.1
+
